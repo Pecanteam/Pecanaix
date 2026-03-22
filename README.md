@@ -1,4 +1,4 @@
-# Pecan — Autonomous Alumni Engagement Operator
+# 🥜 Pecan — Autonomous Alumni Engagement Operator
 
 > **One brief. Zero hand-holding. Full campaign.**
 
