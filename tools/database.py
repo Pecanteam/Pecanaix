@@ -3,7 +3,10 @@ import sqlite3
 from datetime import datetime
 
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "pecan.db")
+if os.environ.get("VERCEL"):
+    DB_PATH = "/tmp/pecan.db"
+else:
+    DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "pecan.db")
 
 
 def get_connection():
@@ -39,7 +42,8 @@ def _ensure_campaign_columns(conn):
 
 def init_database():
     """Creates all tables. Run this once."""
-    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    if os.path.dirname(DB_PATH):
+        os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     conn = get_connection()
     c = conn.cursor()
     try:

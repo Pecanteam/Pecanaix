@@ -2,7 +2,10 @@ import os
 
 import chromadb
 
-CHROMA_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "chroma_db")
+if os.environ.get("VERCEL"):
+    CHROMA_PATH = "/tmp/chroma_db"
+else:
+    CHROMA_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "chroma_db")
 
 
 def get_client():

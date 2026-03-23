@@ -2,7 +2,10 @@ import sqlite3
 import os
 import random
 
-DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'pecan.db')
+if os.environ.get("VERCEL"):
+    DB_PATH = "/tmp/pecan.db"
+else:
+    DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'pecan.db')
 
 FIRST_NAMES = [
     "Emma", "Oliver", "Amara", "James", "Sophia", "Liam", "Priya", "Noah", "Fatima", "William",
