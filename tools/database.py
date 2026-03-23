@@ -352,7 +352,8 @@ def get_matches(campaign_id, selected_only=True):
     conn = get_connection()
     try:
         q = """SELECT m.*, a.name, a.email, a.degree, a.department, a.graduation_year,
-                  a.location_city, a.location_country, a.industry, a.interests
+                  a.location_city, a.location_country, a.industry, a.interests,
+                  a.engagement_score
            FROM matches m JOIN alumni a ON m.alumni_id = a.id
            WHERE m.campaign_id = ?"""
         if selected_only:

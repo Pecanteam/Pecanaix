@@ -473,12 +473,6 @@ PRIOR CAMPAIGN MEMORY (top insights):
                 str(mem_e)[:2000],
             )
 
-        update_campaign(
-            campaign_id,
-            status="COMPLETE",
-            completed_at=datetime.now().isoformat(),
-        )
-
         log_agent(
             campaign_id,
             _AGENT,

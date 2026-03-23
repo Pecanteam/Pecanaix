@@ -645,6 +645,7 @@ def reporter_node(state: CampaignState) -> dict[str, Any]:
         try:
             update_campaign(
                 cid,
+                status="COMPLETE",
                 campaign_phase="COMPLETE",
                 completed_at=datetime.now().isoformat(),
             )

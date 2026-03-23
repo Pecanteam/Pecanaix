@@ -95,6 +95,9 @@ except ImportError:
 
 _sessions: Dict[str, Dict[str, Any]] = {}
 
+# session_id -> campaign_id; prevents duplicate launches from the dashboard
+_launched_sessions: Dict[str, int] = {}
+
 _BRIEF_FIELD_KEYS = (
     "event_type",
     "topic",
@@ -185,6 +188,12 @@ def brief_message(session_id: str, body: BriefMessageBody):
         if session_id not in _sessions:
             raise HTTPException(status_code=404, detail="Session not found")
         session = _sessions[session_id]
+        if session.get("is_complete"):
+            return {
+                "response": "Brief already confirmed. Campaign is running.",
+                "is_complete": True,
+                "collected_fields": _collected_fields(session),
+            }
         agent_text, session = process_user_message(session, body.message)
         _sessions[session_id] = session
         return {
@@ -235,6 +244,11 @@ def campaign_launch(body: CampaignLaunchBody):
             )
 
         if body.session_id is not None:
+            if body.session_id in _launched_sessions:
+                return {
+                    "campaign_id": _launched_sessions[body.session_id],
+                    "status": "already_launched",
+                }
             if get_parsed_brief is None:
                 raise HTTPException(status_code=503, detail="Brief Analyst module unavailable")
             if body.session_id not in _sessions:
@@ -278,7 +292,11 @@ def campaign_launch(body: CampaignLaunchBody):
         if "campaign_id" not in state:
             raise HTTPException(status_code=500, detail="Campaign was not created")
 
-        return {"campaign_id": state["campaign_id"], "status": "launched"}
+        cid = int(state["campaign_id"])
+        if body.session_id is not None:
+            _launched_sessions[body.session_id] = cid
+
+        return {"campaign_id": cid, "status": "launched"}
     except HTTPException:
         raise
     except Exception as exc:
@@ -328,6 +346,13 @@ def campaign_status(campaign_id: int):
         if campaign is None:
             raise HTTPException(status_code=404, detail="Campaign not found")
         outreach = get_outreach(campaign_id)
+        if campaign.get("campaign_phase") == "COMPLETE" and not outreach:
+            return {
+                "status": "RUNNING",
+                "current_cycle": campaign.get("current_cycle", 0),
+                "campaign_phase": "LOOP_2",
+                "total_acceptances": 0,
+            }
         total_acceptances = sum(
             1 for row in outreach if (row.get("status") or "").upper() == "ACCEPTED"
         )
